@@ -6,4 +6,5 @@ transients keep to a clock the tests can move, and the HTTP API answers from
 a queue (`Support/FakeHttp.php`) that records every request.
 
 - **DistanceTest** -- distances, units, map links and the `Location` shape.
-- **Providers/** -- each geocoder's requests, statuses, cache and common answer.
+- **Providers/** -- each geocoder's requests, statuses, cache and common answer,
+  through network's `Remote\Service`, which network tests on its own.

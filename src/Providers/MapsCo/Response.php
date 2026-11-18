@@ -14,7 +14,7 @@ namespace SugarCommerce\Geocoding\Providers\MapsCo;
 
 use SugarCommerce\Geocoding\Distance;
 use SugarCommerce\Geocoding\Maps;
-use SugarCommerce\Geocoding\Response as Base;
+use SugarCommerce\Network\Remote\Response as Base;
 
 class Response extends Base {
 

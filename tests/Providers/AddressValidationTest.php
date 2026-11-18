@@ -152,4 +152,19 @@ final class AddressValidationTest extends TestCase {
 		$this->assertSame( 'GB', $location->get_country_code() );
 		$this->assertSame( 'ChIJ-place', $location->get_place_id() );
 	}
+
+	/**
+	 * An answer is kept a day, under the geocoding family's keys.
+	 *
+	 * @return void
+	 */
+	public function test_answers_are_kept_a_day(): void {
+		FakeHttp::json( self::answer() );
+		$client = new AddressValidation( 'k' );
+		$client->validate( '10 downing st london' );
+
+		$this->assertSame( DAY_IN_SECONDS, $client->get_cache_ttl() );
+		$this->assertSame( array( $GLOBALS['gc_now'] + DAY_IN_SECONDS ), array_column( $GLOBALS['gc_transients'], 'expires' ) );
+		$this->assertStringStartsWith( 'geocoding_address_validation_', (string) array_key_first( $GLOBALS['gc_transients'] ) );
+	}
 }

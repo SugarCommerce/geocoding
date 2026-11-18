@@ -12,7 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\Geocoding\Providers\Google;
 
-use SugarCommerce\Geocoding\Response as Base;
+use SugarCommerce\Network\Remote\Response as Base;
 
 /**
  * Class Response

@@ -14,7 +14,8 @@ namespace SugarCommerce\Geocoding\Providers;
 
 use SugarCommerce\Geocoding\Location;
 use SugarCommerce\Geocoding\Providers\AddressValidation\Response;
-use SugarCommerce\Geocoding\Service;
+use SugarCommerce\Geocoding\Geocoder;
+use SugarCommerce\Network\Remote\Service;
 use WP_Error;
 
 /**
@@ -31,11 +32,18 @@ use WP_Error;
  *
  * @since 1.0.0
  */
-class AddressValidation extends Service {
+class AddressValidation extends Service implements Geocoder {
 
 	protected const ID = 'address_validation';
 
 	protected const NAME = 'Google Address Validation';
+
+	protected const CACHE_GROUP = 'geocoding';
+
+	/**
+	 * How long an answer is kept, by default: a day. An address does not move.
+	 */
+	protected const CACHE_TTL = 86400;
 
 	/**
 	 * The endpoint.

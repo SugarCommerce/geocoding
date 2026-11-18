@@ -86,6 +86,12 @@ not in the options table: it starts a new generation of cache keys (an
 option named `geocoding_{id}_generation`), so nothing kept before is found again. Errors are `WP_Error`s whose codes start with the geocoder's
 id: `google_api_error`, `mapsco_no_results`, `address_validation_unsupported`.
 
+The cache, the failure memory and reading an answer are sugarcommerce/network's
+`SugarCommerce\Network\Remote\Service` -- the family's one cached-API base,
+shared with ip-lookup -- and each answer extends its `Remote\Response`. A
+geocoder of your own extends it, implements `Geocoder`, and sets
+`CACHE_GROUP = 'geocoding'` to keep its transients with these.
+
 ## The common answer
 
 ```php
@@ -190,6 +196,7 @@ This library is `wp-google-geocoding`, `wp-mapsco-geocoding` and
 | Maps.co `Response::get_*_maps_url()`, `get_map_urls()` | unchanged, built by `Maps` |
 | Maps.co `Response::get_available_distance_units()` | unchanged, or `Distance::units()` |
 | `clear_cache( 'forward_' . $address )` (Maps.co) | `clear_cache( 'forward_' . $address . '|json' )` -- the format is part of the question |
+| `SugarCommerce\Geocoding\{Service, Response}` | `SugarCommerce\Network\Remote\{Service, Response}` (sugarcommerce/network) -- one copy, shared with ip-lookup; keys and behaviour unchanged |
 
 Answers that changed:
 
@@ -207,6 +214,7 @@ New: `Geocoder`, `Location`, `locate()` and `locate_point()`, `Maps`, and
 
 * PHP 8.3 or later
 * WordPress 7.1 or later
+* sugarcommerce/network (and through it sugarcommerce/plugin)
 * A key for the service you use
 
 ## License
