@@ -143,4 +143,36 @@ final class MapsCoTest extends TestCase {
 		$this->assertTrue( $client->clear_cache() );
 		$this->assertSame( array(), $GLOBALS['gc_transients'] );
 	}
+
+	/**
+	 * With a persistent object cache the transients are not in the options
+	 * table, so finding them by name finds nothing -- clearing everything
+	 * must still mean the next ask goes to the provider.
+	 *
+	 * @return void
+	 */
+	public function test_clear_cache_with_a_persistent_object_cache(): void {
+		$GLOBALS['gc_object_cache'] = true;
+		FakeHttp::json( array( array( 'lat' => '1', 'lon' => '1' ) ) );
+		FakeHttp::json( array( array( 'lat' => '2', 'lon' => '2' ) ) );
+		$client = new MapsCo( 'k' );
+
+		$this->assertSame( 1.0, $client->geocode( 'Here' )->get_latitude() );
+		$this->assertTrue( $client->clear_cache() );
+		$this->assertSame( 2.0, $client->geocode( 'Here' )->get_latitude() );
+		$this->assertSame( 2.0, $client->geocode( 'Here' )->get_latitude() );
+		$this->assertSame( 2, FakeHttp::count() );
+	}
+
+	/**
+	 * Answers kept before anything was ever cleared are still found.
+	 *
+	 * @return void
+	 */
+	public function test_keys_are_unchanged_until_the_first_clear(): void {
+		FakeHttp::json( array( array( 'lat' => '1', 'lon' => '1' ) ) );
+		( new MapsCo( 'k' ) )->geocode( 'Here' );
+
+		$this->assertSame( array( 'geocoding_mapsco_' . md5( 'forward_Here|json|k' ) ), array_keys( $GLOBALS['gc_transients'] ) );
+	}
 }

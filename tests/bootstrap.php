@@ -35,6 +35,15 @@ $GLOBALS['gc_transients'] = array();
 $GLOBALS['gc_now']        = 1_800_000_000;
 
 /**
+ * Options, and whether transients live in a persistent object cache
+ * rather than the options table (so a LIKE over the table finds none).
+ *
+ * @var array<string, mixed>
+ */
+$GLOBALS['gc_options']      = array();
+$GLOBALS['gc_object_cache'] = false;
+
+/**
  * Forget every transient and queued answer.
  *
  * @return void
@@ -42,6 +51,8 @@ $GLOBALS['gc_now']        = 1_800_000_000;
 function gc_reset(): void {
 	$GLOBALS['gc_transients'] = array();
 	$GLOBALS['gc_now']        = 1_800_000_000;
+	$GLOBALS['gc_options']      = array();
+	$GLOBALS['gc_object_cache'] = false;
 	$_SERVER                   = array();
 	FakeHttp::reset();
 }
@@ -148,6 +159,29 @@ function wp_json_encode( $value ) {
  */
 function add_query_arg( array $args, string $url ) {
 	return $url . ( str_contains( $url, '?' ) ? '&' : '?' ) . http_build_query( $args );
+}
+
+/**
+ * @param string $name    Option.
+ * @param mixed  $default Fallback.
+ *
+ * @return mixed
+ */
+function get_option( $name, $default = false ) {
+	return array_key_exists( $name, $GLOBALS['gc_options'] ) ? $GLOBALS['gc_options'][ $name ] : $default;
+}
+
+/**
+ * @param string    $name     Option.
+ * @param mixed     $value    Value.
+ * @param bool|null $autoload Autoload.
+ *
+ * @return bool
+ */
+function update_option( $name, $value, $autoload = null ) {
+	$GLOBALS['gc_options'][ $name ] = $value;
+
+	return true;
 }
 
 /**
@@ -276,6 +310,10 @@ $GLOBALS['wpdb'] = new class() {
 	public function get_col( $like ) {
 		$prefix = stripslashes( substr( $like, 0, -1 ) );
 		$names  = array();
+
+		if ( $GLOBALS['gc_object_cache'] ) {
+			return $names;
+		}
 
 		foreach ( array_keys( $GLOBALS['gc_transients'] ) as $key ) {
 			if ( str_starts_with( '_transient_' . $key, $prefix ) ) {
