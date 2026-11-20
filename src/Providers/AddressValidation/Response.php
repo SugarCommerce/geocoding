@@ -12,6 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\Geocoding\Providers\AddressValidation;
 
+use SugarCommerce\Geocoding\Support\Field;
 use SugarCommerce\Geocoding\Traits\AddressValidationResponse\Assessment;
 use SugarCommerce\Geocoding\Traits\AddressValidationResponse\Usps;
 use SugarCommerce\Network\Remote\Response as Base;
@@ -68,7 +69,7 @@ class Response extends Base {
 	 * @return string|null The unique identifier for this validation response
 	 */
 	public function get_response_id(): ?string {
-		return $this->data['responseId'] ?? null;
+		return Field::text( $this->at( 'responseId' ) );
 	}
 
 	/**
@@ -77,7 +78,7 @@ class Response extends Base {
 	 * @return array|null The complete verdict information from the API
 	 */
 	public function get_verdict(): ?array {
-		return $this->data['result']['verdict'] ?? null;
+		return Field::map( $this->at( 'result', 'verdict' ) );
 	}
 
 	/**
@@ -86,7 +87,7 @@ class Response extends Base {
 	 * @return string|null The granularity level of the input address
 	 */
 	public function get_input_granularity(): ?string {
-		return $this->data['result']['verdict']['inputGranularity'] ?? null;
+		return Field::text( $this->at( 'result', 'verdict', 'inputGranularity' ) );
 	}
 
 	/**
@@ -95,7 +96,7 @@ class Response extends Base {
 	 * @return string|null The granularity level of the validation
 	 */
 	public function get_validation_granularity(): ?string {
-		return $this->data['result']['verdict']['validationGranularity'] ?? null;
+		return Field::text( $this->at( 'result', 'verdict', 'validationGranularity' ) );
 	}
 
 	/**
@@ -104,7 +105,7 @@ class Response extends Base {
 	 * @return string|null The granularity level of the geocoding
 	 */
 	public function get_geocode_granularity(): ?string {
-		return $this->data['result']['verdict']['geocodeGranularity'] ?? null;
+		return Field::text( $this->at( 'result', 'verdict', 'geocodeGranularity' ) );
 	}
 
 	/**
@@ -113,7 +114,7 @@ class Response extends Base {
 	 * @return bool True if the address is complete, false otherwise
 	 */
 	public function is_address_complete(): bool {
-		return $this->data['result']['verdict']['addressComplete'] ?? false;
+		return true === $this->at( 'result', 'verdict', 'addressComplete' );
 	}
 
 	/**
@@ -122,7 +123,7 @@ class Response extends Base {
 	 * @return bool True if the address has unconfirmed components
 	 */
 	public function has_unconfirmed_components(): bool {
-		return $this->data['result']['verdict']['hasUnconfirmedComponents'] ?? false;
+		return true === $this->at( 'result', 'verdict', 'hasUnconfirmedComponents' );
 	}
 
 	/**
@@ -131,7 +132,7 @@ class Response extends Base {
 	 * @return bool True if the address has inferred components
 	 */
 	public function has_inferred_components(): bool {
-		return $this->data['result']['verdict']['hasInferredComponents'] ?? false;
+		return true === $this->at( 'result', 'verdict', 'hasInferredComponents' );
 	}
 
 	/**
@@ -140,7 +141,7 @@ class Response extends Base {
 	 * @return bool True if the address has replaced components
 	 */
 	public function has_replaced_components(): bool {
-		return $this->data['result']['verdict']['hasReplacedComponents'] ?? false;
+		return true === $this->at( 'result', 'verdict', 'hasReplacedComponents' );
 	}
 
 	/**
@@ -149,7 +150,7 @@ class Response extends Base {
 	 * @return string|null The complete formatted address string
 	 */
 	public function get_formatted_address(): ?string {
-		return $this->data['result']['address']['formattedAddress'] ?? null;
+		return Field::text( $this->at( 'result', 'address', 'formattedAddress' ) );
 	}
 
 	/**
@@ -158,7 +159,7 @@ class Response extends Base {
 	 * @return array|null The complete postal address data
 	 */
 	public function get_postal_address(): ?array {
-		return $this->data['result']['address']['postalAddress'] ?? null;
+		return Field::map( $this->at( 'result', 'address', 'postalAddress' ) );
 	}
 
 	/**
@@ -167,7 +168,7 @@ class Response extends Base {
 	 * @return array The address lines array
 	 */
 	public function get_address_lines(): array {
-		return $this->get_postal_address()['addressLines'] ?? [];
+		return self::strings( $this->get_postal_address()['addressLines'] ?? null );
 	}
 
 	/**
@@ -176,7 +177,7 @@ class Response extends Base {
 	 * @return string|null The administrative area
 	 */
 	public function get_administrative_area(): ?string {
-		return $this->get_postal_address()['administrativeArea'] ?? null;
+		return Field::text( $this->get_postal_address()['administrativeArea'] ?? null );
 	}
 
 	/**
@@ -185,7 +186,7 @@ class Response extends Base {
 	 * @return string|null The region code
 	 */
 	public function get_region_code(): ?string {
-		return $this->get_postal_address()['regionCode'] ?? null;
+		return Field::text( $this->get_postal_address()['regionCode'] ?? null );
 	}
 
 	/**
@@ -194,7 +195,7 @@ class Response extends Base {
 	 * @return string|null The locality name
 	 */
 	public function get_locality(): ?string {
-		return $this->get_postal_address()['locality'] ?? null;
+		return Field::text( $this->get_postal_address()['locality'] ?? null );
 	}
 
 	/**
@@ -203,7 +204,7 @@ class Response extends Base {
 	 * @return string|null The sublocality name
 	 */
 	public function get_sublocality(): ?string {
-		return $this->get_postal_address()['sublocality'] ?? null;
+		return Field::text( $this->get_postal_address()['sublocality'] ?? null );
 	}
 
 	/**
@@ -212,7 +213,7 @@ class Response extends Base {
 	 * @return string|null The postal code
 	 */
 	public function get_postal_code(): ?string {
-		return $this->get_postal_address()['postalCode'] ?? null;
+		return Field::text( $this->get_postal_address()['postalCode'] ?? null );
 	}
 
 	/**
@@ -221,7 +222,7 @@ class Response extends Base {
 	 * @return string|null The sorting code
 	 */
 	public function get_sorting_code(): ?string {
-		return $this->get_postal_address()['sortingCode'] ?? null;
+		return Field::text( $this->get_postal_address()['sortingCode'] ?? null );
 	}
 
 	/**
@@ -299,7 +300,7 @@ class Response extends Base {
 	 * @return array Array of address components
 	 */
 	public function get_address_components(): array {
-		return $this->data['result']['address']['addressComponents'] ?? [];
+		return Field::map( $this->at( 'result', 'address', 'addressComponents' ) ) ?? [];
 	}
 
 	/**
@@ -311,7 +312,7 @@ class Response extends Base {
 	 */
 	public function get_address_component( string $type ): ?array {
 		foreach ( $this->get_address_components() as $component ) {
-			if ( $component['componentType'] === $type ) {
+			if ( is_array( $component ) && ( $component['componentType'] ?? null ) === $type ) {
 				return $component;
 			}
 		}
@@ -325,7 +326,7 @@ class Response extends Base {
 	 * @return array Array of missing component types
 	 */
 	public function get_missing_component_types(): array {
-		return $this->data['result']['address']['missingComponentTypes'] ?? [];
+		return self::strings( $this->at( 'result', 'address', 'missingComponentTypes' ) );
 	}
 
 	/**
@@ -334,7 +335,7 @@ class Response extends Base {
 	 * @return array Array of unconfirmed component types
 	 */
 	public function get_unconfirmed_component_types(): array {
-		return $this->data['result']['address']['unconfirmedComponentTypes'] ?? [];
+		return self::strings( $this->at( 'result', 'address', 'unconfirmedComponentTypes' ) );
 	}
 
 	/**
@@ -343,7 +344,7 @@ class Response extends Base {
 	 * @return array Array of unresolved tokens
 	 */
 	public function get_unresolved_tokens(): array {
-		return $this->data['result']['address']['unresolvedTokens'] ?? [];
+		return self::strings( $this->at( 'result', 'address', 'unresolvedTokens' ) );
 	}
 
 	/**
@@ -352,15 +353,23 @@ class Response extends Base {
 	 * @return array|null The geocode data including latitude and longitude
 	 */
 	public function get_geocode(): ?array {
-		$location = $this->data['result']['geocode']['location'] ?? null;
-		if ( $location ) {
-			return [
-				'latitude'  => $location['latitude'] ?? null,
-				'longitude' => $location['longitude'] ?? null,
-			];
+		$location = Field::map( $this->at( 'result', 'geocode', 'location' ) );
+
+		if ( null === $location ) {
+			return null;
 		}
 
-		return null;
+		$latitude  = Field::float( $location['latitude'] ?? null );
+		$longitude = Field::float( $location['longitude'] ?? null );
+
+		if ( null === $latitude || null === $longitude ) {
+			return null;
+		}
+
+		return [
+			'latitude'  => $latitude,
+			'longitude' => $longitude,
+		];
 	}
 
 	/**
@@ -369,7 +378,7 @@ class Response extends Base {
 	 * @return array|null The plus code data
 	 */
 	public function get_plus_code(): ?array {
-		return $this->data['result']['geocode']['plusCode'] ?? null;
+		return Field::map( $this->at( 'result', 'geocode', 'plusCode' ) );
 	}
 
 	/**
@@ -378,7 +387,7 @@ class Response extends Base {
 	 * @return array|null The viewport bounds data
 	 */
 	public function get_viewport(): ?array {
-		return $this->data['result']['geocode']['bounds'] ?? null;
+		return Field::map( $this->at( 'result', 'geocode', 'bounds' ) );
 	}
 
 	/**
@@ -387,7 +396,7 @@ class Response extends Base {
 	 * @return float|null The feature size in meters
 	 */
 	public function get_feature_size_meters(): ?float {
-		return $this->data['result']['geocode']['featureSizeMeters'] ?? null;
+		return Field::float( $this->at( 'result', 'geocode', 'featureSizeMeters' ) );
 	}
 
 	/**
@@ -396,7 +405,7 @@ class Response extends Base {
 	 * @return string|null The Google Place ID
 	 */
 	public function get_place_id(): ?string {
-		return $this->data['result']['geocode']['placeId'] ?? null;
+		return Field::text( $this->at( 'result', 'geocode', 'placeId' ) );
 	}
 
 	/**
@@ -405,7 +414,7 @@ class Response extends Base {
 	 * @return array Array of place types
 	 */
 	public function get_place_types(): array {
-		return $this->data['result']['geocode']['placeTypes'] ?? [];
+		return self::strings( $this->at( 'result', 'geocode', 'placeTypes' ) );
 	}
 
 	/**
@@ -414,7 +423,7 @@ class Response extends Base {
 	 * @return array|null The address metadata
 	 */
 	public function get_metadata(): ?array {
-		return $this->data['result']['metadata'] ?? null;
+		return Field::map( $this->at( 'result', 'metadata' ) );
 	}
 
 	/**
@@ -423,7 +432,7 @@ class Response extends Base {
 	 * @return bool True if the address is a business location
 	 */
 	public function is_business(): bool {
-		return $this->data['result']['metadata']['business'] ?? false;
+		return true === $this->at( 'result', 'metadata', 'business' );
 	}
 
 	/**
@@ -432,7 +441,7 @@ class Response extends Base {
 	 * @return bool True if the address is a PO Box
 	 */
 	public function is_po_box(): bool {
-		return $this->data['result']['metadata']['poBox'] ?? false;
+		return true === $this->at( 'result', 'metadata', 'poBox' );
 	}
 
 	/**
@@ -441,7 +450,7 @@ class Response extends Base {
 	 * @return bool True if the address is residential
 	 */
 	public function is_residential(): bool {
-		return $this->data['result']['metadata']['residential'] ?? false;
+		return true === $this->at( 'result', 'metadata', 'residential' );
 	}
 
 	/**
@@ -450,6 +459,40 @@ class Response extends Base {
 	 * @return array|null The address in English Latin format
 	 */
 	public function get_english_latin_address(): ?array {
-		return $this->data['result']['englishLatinAddress'] ?? null;
+		return Field::map( $this->at( 'result', 'englishLatinAddress' ) );
+	}
+
+	/**
+	 * A field deep in the answer, reached only through lists and maps.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string ...$path The keys, outermost first.
+	 *
+	 * @return mixed Null when any step is missing or not a map.
+	 */
+	protected function at( string ...$path ): mixed {
+		$value = $this->data;
+
+		foreach ( $path as $key ) {
+			if ( ! is_array( $value ) || ! array_key_exists( $key, $value ) ) {
+				return null;
+			}
+
+			$value = $value[ $key ];
+		}
+
+		return $value;
+	}
+
+	/**
+	 * The strings in a list, leaving out anything else.
+	 *
+	 * @param mixed $value The field.
+	 *
+	 * @return string[]
+	 */
+	private static function strings( mixed $value ): array {
+		return array_values( array_filter( Field::map( $value ) ?? [], 'is_string' ) );
 	}
 }

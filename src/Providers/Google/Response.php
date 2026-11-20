@@ -12,6 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\Geocoding\Providers\Google;
 
+use SugarCommerce\Geocoding\Support\Field;
 use SugarCommerce\Network\Remote\Response as Base;
 
 /**
@@ -27,7 +28,7 @@ class Response extends Base {
 	 * @return array|null
 	 */
 	public function get_first_result(): ?array {
-		return $this->data['results'][0] ?? null;
+		return Field::map( $this->get_results()[0] ?? null );
 	}
 
 	/**
@@ -36,7 +37,7 @@ class Response extends Base {
 	 * @return array
 	 */
 	public function get_results(): array {
-		return $this->data['results'] ?? [];
+		return array_values( array_filter( Field::map( $this->data['results'] ?? null ) ?? [], 'is_array' ) );
 	}
 
 	/**
@@ -45,9 +46,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_formatted_address(): ?string {
-		$result = $this->get_first_result();
-
-		return $result['formatted_address'] ?? null;
+		return Field::text( $this->get_first_result()['formatted_address'] ?? null );
 	}
 
 	/**
@@ -56,15 +55,18 @@ class Response extends Base {
 	 * @return array|null Array with 'latitude' and 'longitude' or null if not available
 	 */
 	public function get_coordinates(): ?array {
-		$result = $this->get_first_result();
-		if ( isset( $result['geometry']['location'] ) ) {
-			return [
-				'latitude'  => $result['geometry']['location']['lat'],
-				'longitude' => $result['geometry']['location']['lng'],
-			];
+		$location  = Field::map( Field::map( $this->get_first_result()['geometry'] ?? null )['location'] ?? null );
+		$latitude  = Field::float( $location['lat'] ?? null );
+		$longitude = Field::float( $location['lng'] ?? null );
+
+		if ( null === $latitude || null === $longitude ) {
+			return null;
 		}
 
-		return null;
+		return [
+			'latitude'  => $latitude,
+			'longitude' => $longitude,
+		];
 	}
 
 	/**
@@ -95,9 +97,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_place_id(): ?string {
-		$result = $this->get_first_result();
-
-		return $result['place_id'] ?? null;
+		return Field::text( $this->get_first_result()['place_id'] ?? null );
 	}
 
 	/**
@@ -106,7 +106,7 @@ class Response extends Base {
 	 * @return array|null Array containing compound_code and global_code
 	 */
 	public function get_plus_code(): ?array {
-		return $this->data['plus_code'] ?? $this->get_first_result()['plus_code'] ?? null;
+		return Field::map( $this->data['plus_code'] ?? null ) ?? Field::map( $this->get_first_result()['plus_code'] ?? null );
 	}
 
 	/**
@@ -115,9 +115,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_plus_code_compound(): ?string {
-		$plus_code = $this->get_plus_code();
-
-		return $plus_code['compound_code'] ?? null;
+		return Field::text( $this->get_plus_code()['compound_code'] ?? null );
 	}
 
 	/**
@@ -126,9 +124,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_plus_code_global(): ?string {
-		$plus_code = $this->get_plus_code();
-
-		return $plus_code['global_code'] ?? null;
+		return Field::text( $this->get_plus_code()['global_code'] ?? null );
 	}
 
 	/**
@@ -137,9 +133,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_location_type(): ?string {
-		$result = $this->get_first_result();
-
-		return $result['geometry']['location_type'] ?? null;
+		return Field::text( Field::map( $this->get_first_result()['geometry'] ?? null )['location_type'] ?? null );
 	}
 
 	/**
@@ -148,9 +142,7 @@ class Response extends Base {
 	 * @return array Types like 'street_address', 'route', 'political', etc.
 	 */
 	public function get_types(): array {
-		$result = $this->get_first_result();
-
-		return $result['types'] ?? [];
+		return self::strings( $this->get_first_result()['types'] ?? null );
 	}
 
 	/**
@@ -159,9 +151,9 @@ class Response extends Base {
 	 * @return array
 	 */
 	public function get_address_components(): array {
-		$result = $this->get_first_result();
+		$components = Field::map( $this->get_first_result()['address_components'] ?? null ) ?? [];
 
-		return $result['address_components'] ?? [];
+		return array_values( array_filter( $components, 'is_array' ) );
 	}
 
 	/**
@@ -173,7 +165,7 @@ class Response extends Base {
 	 */
 	public function get_address_components_by_types( array $types ): array {
 		return array_filter( $this->get_address_components(), function ( $component ) use ( $types ) {
-			return count( array_intersect( $types, $component['types'] ) ) === count( $types );
+			return count( array_intersect( $types, self::strings( $component['types'] ?? null ) ) ) === count( $types );
 		} );
 	}
 
@@ -187,8 +179,8 @@ class Response extends Base {
 	public function get_address_component( string $type ): ?string {
 		$components = $this->get_address_components();
 		foreach ( $components as $component ) {
-			if ( in_array( $type, $component['types'], true ) ) {
-				return $component['long_name'];
+			if ( in_array( $type, self::strings( $component['types'] ?? null ), true ) ) {
+				return Field::text( $component['long_name'] ?? null );
 			}
 		}
 
@@ -205,8 +197,8 @@ class Response extends Base {
 	public function get_address_component_short( string $type ): ?string {
 		$components = $this->get_address_components();
 		foreach ( $components as $component ) {
-			if ( in_array( $type, $component['types'], true ) ) {
-				return $component['short_name'];
+			if ( in_array( $type, self::strings( $component['types'] ?? null ), true ) ) {
+				return Field::text( $component['short_name'] ?? null );
 			}
 		}
 
@@ -343,9 +335,7 @@ class Response extends Base {
 	 * @return array|null Array with northeast and southwest bounds
 	 */
 	public function get_viewport(): ?array {
-		$result = $this->get_first_result();
-
-		return $result['geometry']['viewport'] ?? null;
+		return Field::map( Field::map( $this->get_first_result()['geometry'] ?? null )['viewport'] ?? null );
 	}
 
 	/**
@@ -376,7 +366,7 @@ class Response extends Base {
 	 * @return string
 	 */
 	public function get_status(): string {
-		return $this->data['status'] ?? '';
+		return Field::text( $this->data['status'] ?? null ) ?? '';
 	}
 
 	/**
@@ -397,9 +387,7 @@ class Response extends Base {
 	 * @return bool
 	 */
 	public function is_partial_match(): bool {
-		$result = $this->get_first_result();
-
-		return isset( $result['partial_match'] ) && $result['partial_match'];
+		return true === ( $this->get_first_result()['partial_match'] ?? null );
 	}
 
 	/**
@@ -411,5 +399,16 @@ class Response extends Base {
 	 */
 	public function iterate_results( callable $callback ): array {
 		return array_map( $callback, $this->get_results() );
+	}
+
+	/**
+	 * The strings in a list, leaving out anything else.
+	 *
+	 * @param mixed $value The field.
+	 *
+	 * @return string[]
+	 */
+	private static function strings( mixed $value ): array {
+		return array_values( array_filter( Field::map( $value ) ?? [], 'is_string' ) );
 	}
 }

@@ -14,8 +14,17 @@ namespace SugarCommerce\Geocoding\Providers\MapsCo;
 
 use SugarCommerce\Geocoding\Distance;
 use SugarCommerce\Geocoding\Maps;
+use SugarCommerce\Geocoding\Support\Field;
 use SugarCommerce\Network\Remote\Response as Base;
 
+/**
+ * Class Response
+ *
+ * Maps.co's answer for one place: OpenStreetMap's coordinates, names and
+ * address parts, with map links and the size of its bounding box.
+ *
+ * @since 1.0.0
+ */
 class Response extends Base {
 
 	/**
@@ -24,7 +33,7 @@ class Response extends Base {
 	 * @return float|null
 	 */
 	public function get_latitude(): ?float {
-		return isset( $this->data['lat'] ) ? (float) $this->data['lat'] : null;
+		return Field::float( $this->data['lat'] ?? null );
 	}
 
 	/**
@@ -33,7 +42,7 @@ class Response extends Base {
 	 * @return float|null
 	 */
 	public function get_longitude(): ?float {
-		return isset( $this->data['lon'] ) ? (float) $this->data['lon'] : null;
+		return Field::float( $this->data['lon'] ?? null );
 	}
 
 	/**
@@ -119,7 +128,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_display_name(): ?string {
-		return $this->data['display_name'] ?? null;
+		return Field::text( $this->data['display_name'] ?? null );
 	}
 
 	/**
@@ -128,7 +137,7 @@ class Response extends Base {
 	 * @return int|null
 	 */
 	public function get_place_id(): ?int {
-		return isset( $this->data['place_id'] ) ? (int) $this->data['place_id'] : null;
+		return Field::int( $this->data['place_id'] ?? null );
 	}
 
 	/**
@@ -137,7 +146,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_osm_type(): ?string {
-		return $this->data['osm_type'] ?? null;
+		return Field::text( $this->data['osm_type'] ?? null );
 	}
 
 	/**
@@ -146,7 +155,7 @@ class Response extends Base {
 	 * @return int|null
 	 */
 	public function get_osm_id(): ?int {
-		return isset( $this->data['osm_id'] ) ? (int) $this->data['osm_id'] : null;
+		return Field::int( $this->data['osm_id'] ?? null );
 	}
 
 	/**
@@ -155,7 +164,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_class(): ?string {
-		return $this->data['class'] ?? null;
+		return Field::text( $this->data['class'] ?? null );
 	}
 
 	/**
@@ -164,7 +173,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_type(): ?string {
-		return $this->data['type'] ?? null;
+		return Field::text( $this->data['type'] ?? null );
 	}
 
 	/**
@@ -173,7 +182,7 @@ class Response extends Base {
 	 * @return float|null
 	 */
 	public function get_importance(): ?float {
-		return isset( $this->data['importance'] ) ? (float) $this->data['importance'] : null;
+		return Field::float( $this->data['importance'] ?? null );
 	}
 
 	/**
@@ -182,7 +191,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_license(): ?string {
-		return $this->data['licence'] ?? null;
+		return Field::text( $this->data['licence'] ?? null );
 	}
 
 	/**
@@ -191,15 +200,18 @@ class Response extends Base {
 	 * @return array|null Array with min/max lat/lon values or null
 	 */
 	public function get_bounding_box(): ?array {
-		if ( ! isset( $this->data['boundingbox'] ) || ! is_array( $this->data['boundingbox'] ) ) {
+		$box    = Field::map( $this->data['boundingbox'] ?? null ) ?? [];
+		$values = array_map( fn ( $i ) => Field::float( $box[ $i ] ?? null ), [ 0, 1, 2, 3 ] );
+
+		if ( in_array( null, $values, true ) ) {
 			return null;
 		}
 
 		return [
-			'min_lat' => (float) $this->data['boundingbox'][0],
-			'max_lat' => (float) $this->data['boundingbox'][1],
-			'min_lon' => (float) $this->data['boundingbox'][2],
-			'max_lon' => (float) $this->data['boundingbox'][3],
+			'min_lat' => $values[0],
+			'max_lat' => $values[1],
+			'min_lon' => $values[2],
+			'max_lon' => $values[3],
 		];
 	}
 
@@ -209,7 +221,7 @@ class Response extends Base {
 	 * @return bool
 	 */
 	public function has_bounding_box(): bool {
-		return isset( $this->data['boundingbox'] ) && is_array( $this->data['boundingbox'] );
+		return null !== $this->get_bounding_box();
 	}
 
 
@@ -295,13 +307,15 @@ class Response extends Base {
 	 * @return array|null
 	 */
 	public function get_address(): ?array {
-		if ( isset( $this->data['address'] ) ) {
-			return $this->data['address'];
+		$address = Field::map( $this->data['address'] ?? null );
+
+		if ( null !== $address ) {
+			return $address;
 		}
 
 		// For forward geocoding, try to parse from display_name
-		if ( isset( $this->data['display_name'] ) ) {
-			$parts   = explode( ', ', $this->data['display_name'] );
+		if ( null !== $this->get_display_name() ) {
+			$parts   = explode( ', ', $this->get_display_name() );
 			$address = [];
 
 			// Last part is always country
@@ -343,9 +357,7 @@ class Response extends Base {
 	 * @return string|null
 	 */
 	public function get_address_component( string $component ): ?string {
-		$address = $this->get_address();
-
-		return $address[ $component ] ?? null;
+		return Field::text( $this->get_address()[ $component ] ?? null );
 	}
 
 	/**

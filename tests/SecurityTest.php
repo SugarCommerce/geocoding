@@ -11,6 +11,7 @@ declare( strict_types=1 );
 namespace SugarCommerce\Geocoding\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SugarCommerce\Geocoding\Location;
 use SugarCommerce\Geocoding\Providers\AddressValidation;
 use SugarCommerce\Geocoding\Providers\Google;
 use SugarCommerce\Geocoding\Providers\MapsCo;
@@ -102,6 +103,131 @@ final class SecurityTest extends TestCase {
 		( new Google( 'k' ) )->geocode( "1 Main St\r\nLondon" );
 
 		$this->assertSame( '1 Main St London', self::sent()['query']['address'] ?? null );
+	}
+
+	/**
+	 * A field of the wrong type is no answer, not a fatal error on the
+	 * page that asked: Google.
+	 *
+	 * @return void
+	 */
+	public function test_google_field_of_the_wrong_type_is_no_answer(): void {
+		FakeHttp::json(
+			array(
+				'status'  => 'OK',
+				'results' => array(
+					array(
+						'formatted_address'  => array( 'nested' ),
+						'place_id'           => 42,
+						'types'              => 'premise',
+						'geometry'           => array( 'location' => array( 'lat' => '51.5', 'lng' => array() ) ),
+						'address_components' => array(
+							array( 'long_name' => 'Downing Street', 'types' => 'route' ),
+							'not a component',
+							array( 'long_name' => array( 'London' ), 'short_name' => 7, 'types' => array( 'locality', 'country' ) ),
+						),
+					),
+				),
+			)
+		);
+
+		$client   = new Google( 'k' );
+		$location = $client->locate( '10 Downing Street' );
+
+		$this->assertInstanceOf( Location::class, $location );
+		$this->assertFalse( $location->has_coordinates() );
+		$this->assertNull( $location->get_formatted_address() );
+
+		$response = $location->get_response();
+
+		$this->assertNull( $response->get_latitude() );
+		$this->assertNull( $response->get_street_name() );
+		$this->assertNull( $response->get_city() );
+		$this->assertSame( '7', $response->get_country_short() );
+		$this->assertSame( '42', $response->get_place_id() );
+		$this->assertSame( array(), $response->get_types() );
+		$this->assertFalse( $response->is_business_location() );
+		$this->assertCount( 0, $response->get_address_components_by_types( array( 'route' ) ) );
+	}
+
+	/**
+	 * The same for Maps.co.
+	 *
+	 * @return void
+	 */
+	public function test_mapsco_field_of_the_wrong_type_is_no_answer(): void {
+		FakeHttp::json(
+			array(
+				array(
+					'lat'          => 'north',
+					'lon'          => '2.29',
+					'display_name' => array( 'Tour Eiffel' ),
+					'type'         => 7,
+					'address'      => 'Paris',
+					'boundingbox'  => array( '48.85' ),
+					'importance'   => 'high',
+				),
+			)
+		);
+
+		$location = ( new MapsCo( 'k' ) )->locate( 'Tour Eiffel' );
+
+		$this->assertInstanceOf( Location::class, $location );
+		$this->assertFalse( $location->has_coordinates() );
+
+		$response = $location->get_response();
+
+		$this->assertNull( $response->get_latitude() );
+		$this->assertNull( $response->get_display_name() );
+		$this->assertSame( '7', $response->get_type() );
+		$this->assertNull( $response->get_address() );
+		$this->assertNull( $response->get_city() );
+		$this->assertNull( $response->get_bounding_box() );
+	}
+
+	/**
+	 * The same for Address Validation.
+	 *
+	 * @return void
+	 */
+	public function test_address_validation_field_of_the_wrong_type_is_no_answer(): void {
+		FakeHttp::json(
+			array(
+				'result' => array(
+					'verdict'    => 'complete',
+					'address'    => array(
+						'formattedAddress'  => array( 'x' ),
+						'postalAddress'     => array( 'regionCode' => array( 'GB' ), 'locality' => 5, 'addressLines' => 'one line' ),
+						'addressComponents' => array( 'not a component', array( 'componentType' => array( 'route' ) ) ),
+						'missingComponentTypes' => 'none',
+					),
+					'geocode'    => array( 'location' => array( 'latitude' => 'x', 'longitude' => 1 ), 'placeId' => array() ),
+					'metadata'   => 'none',
+					'uspsData'   => array( 'dpvConfirmation' => array( 'Y' ), 'standardizedAddress' => 'x' ),
+				),
+				'responseId' => 7,
+			)
+		);
+
+		$response = ( new AddressValidation( 'k' ) )->validate( '10 Downing Street' );
+
+		$this->assertNull( $response->get_formatted_address() );
+		$this->assertNull( $response->get_region_code() );
+		$this->assertSame( '5', $response->get_locality() );
+		$this->assertSame( array(), $response->get_address_lines() );
+		$this->assertNull( $response->get_address_component( 'route' ) );
+		$this->assertSame( array(), $response->get_missing_component_types() );
+		$this->assertNull( $response->get_geocode() );
+		$this->assertNull( $response->get_place_id() );
+		$this->assertNull( $response->get_metadata() );
+		$this->assertFalse( $response->is_business() );
+		$this->assertNull( $response->get_dpv_confirmation() );
+		$this->assertSame( '7', $response->get_response_id() );
+		$this->assertIsInt( $response->get_score() );
+		$this->assertIsString( $response->get_rating() );
+		$this->assertIsArray( $response->check_validity() );
+		$this->assertIsArray( $response->get_standardized_address() );
+		$this->assertIsBool( $response->is_shippable() );
 	}
 }
 

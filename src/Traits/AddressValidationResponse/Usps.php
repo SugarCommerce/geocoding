@@ -12,6 +12,8 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\Geocoding\Traits\AddressValidationResponse;
 
+use SugarCommerce\Geocoding\Support\Field;
+
 /**
  * Trait Usps
  *
@@ -29,7 +31,7 @@ trait Usps {
 	 * @return array|null The USPS-specific address data
 	 */
 	public function get_usps_data(): ?array {
-		return $this->data['result']['uspsData'] ?? null;
+		return Field::map( $this->at( 'result', 'uspsData' ) );
 	}
 
 	/**
@@ -38,7 +40,7 @@ trait Usps {
 	 * @return array|null The USPS standardized address
 	 */
 	public function get_usps_standardized_address(): ?array {
-		return $this->data['result']['uspsData']['standardizedAddress'] ?? null;
+		return Field::map( $this->at( 'result', 'uspsData', 'standardizedAddress' ) );
 	}
 
 	/**
@@ -47,7 +49,7 @@ trait Usps {
 	 * @return string|null The USPS delivery point code
 	 */
 	public function get_delivery_point_code(): ?string {
-		return $this->data['result']['uspsData']['deliveryPointCode'] ?? null;
+		return Field::text( $this->at( 'result', 'uspsData', 'deliveryPointCode' ) );
 	}
 
 	/**
@@ -56,7 +58,7 @@ trait Usps {
 	 * @return string|null The USPS carrier route
 	 */
 	public function get_carrier_route(): ?string {
-		return $this->data['result']['uspsData']['carrierRoute'] ?? null;
+		return Field::text( $this->at( 'result', 'uspsData', 'carrierRoute' ) );
 	}
 
 	/**
@@ -65,7 +67,7 @@ trait Usps {
 	 * @return bool True if the address is a CMRA
 	 */
 	public function is_commercial_mail_receiver(): bool {
-		return ( $this->data['result']['uspsData']['dpvCmra'] ?? '' ) === self::USPS_CONFIRMED;
+		return self::USPS_CONFIRMED === $this->at( 'result', 'uspsData', 'dpvCmra' );
 	}
 
 	/**
@@ -74,7 +76,7 @@ trait Usps {
 	 * @return bool True if the address is vacant
 	 */
 	public function is_vacant(): bool {
-		return ( $this->data['result']['uspsData']['dpvVacant'] ?? '' ) === self::USPS_CONFIRMED;
+		return self::USPS_CONFIRMED === $this->at( 'result', 'uspsData', 'dpvVacant' );
 	}
 
 	/**
@@ -83,7 +85,7 @@ trait Usps {
 	 * @return bool True if the address is active
 	 */
 	public function is_active(): bool {
-		return ( $this->data['result']['uspsData']['dpvNoStat'] ?? '' ) === self::USPS_NOT_CONFIRMED;
+		return self::USPS_NOT_CONFIRMED === $this->at( 'result', 'uspsData', 'dpvNoStat' );
 	}
 
 	/**
@@ -92,6 +94,6 @@ trait Usps {
 	 * @return string|null The USPS DPV confirmation status
 	 */
 	public function get_dpv_confirmation(): ?string {
-		return $this->data['result']['uspsData']['dpvConfirmation'] ?? null;
+		return Field::text( $this->at( 'result', 'uspsData', 'dpvConfirmation' ) );
 	}
 }

@@ -12,6 +12,8 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\Geocoding\Traits\AddressValidationResponse;
 
+use SugarCommerce\Geocoding\Support\Field;
+
 /**
  * Trait Assessment
  *
@@ -38,17 +40,15 @@ trait Assessment {
 	 * } Structured address components
 	 */
 	public function get_standardized_address(): array {
-		$postal = $this->get_postal_address();
-
 		return [
-			'address_lines'       => $postal['addressLines'] ?? [],
-			'administrative_area' => $postal['administrativeArea'] ?? null,
-			'language_code'       => $postal['languageCode'] ?? null,
-			'locality'            => $postal['locality'] ?? null,
-			'postal_code'         => $postal['postalCode'] ?? null,
-			'region_code'         => $postal['regionCode'] ?? null,
-			'sorting_code'        => $postal['sortingCode'] ?? null,
-			'sublocality'         => $postal['sublocality'] ?? null,
+			'address_lines'       => $this->get_address_lines(),
+			'administrative_area' => $this->get_administrative_area(),
+			'language_code'       => Field::text( $this->get_postal_address()['languageCode'] ?? null ),
+			'locality'            => $this->get_locality(),
+			'postal_code'         => $this->get_postal_code(),
+			'region_code'         => $this->get_region_code(),
+			'sorting_code'        => $this->get_sorting_code(),
+			'sublocality'         => $this->get_sublocality(),
 			'formatted_address'   => $this->get_formatted_address(),
 		];
 	}
