@@ -28,7 +28,7 @@ final class Location {
 	/**
 	 * The parts a location can hold.
 	 */
-	private const PARTS = array(
+	private const array PARTS = array(
 		'formatted_address',
 		'house_number',
 		'street',

@@ -29,21 +29,21 @@ use WP_Error;
  */
 class Google extends Service implements Geocoder {
 
-	protected const ID = 'google';
+	protected const string ID = 'google';
 
-	protected const NAME = 'Google Geocoding';
+	protected const string NAME = 'Google Geocoding';
 
-	protected const CACHE_GROUP = 'geocoding';
+	protected const string CACHE_GROUP = 'geocoding';
 
 	/**
 	 * How long an answer is kept, by default: a day. An address does not move.
 	 */
-	protected const CACHE_TTL = 86400;
+	protected const int CACHE_TTL = 86400;
 
 	/**
 	 * The endpoint.
 	 */
-	private const API_ENDPOINT = 'https://maps.googleapis.com/maps/api/geocode/json';
+	private const string API_ENDPOINT = 'https://maps.googleapis.com/maps/api/geocode/json';
 
 	/**
 	 * Where an address is.
@@ -98,6 +98,7 @@ class Google extends Service implements Geocoder {
 	 *
 	 * @return Location|WP_Error
 	 */
+	#[\Override]
 	public function locate( string $address ): Location|WP_Error {
 		return $this->location( $this->geocode( $address ) );
 	}
@@ -112,6 +113,7 @@ class Google extends Service implements Geocoder {
 	 *
 	 * @return Location|WP_Error
 	 */
+	#[\Override]
 	public function locate_point( float $latitude, float $longitude ): Location|WP_Error {
 		return $this->location( $this->reverse_geocode( $latitude, $longitude ) );
 	}

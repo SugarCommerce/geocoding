@@ -30,18 +30,23 @@ use WP_Error;
  */
 class MapsCo extends Service implements Geocoder {
 
-	protected const ID = 'mapsco';
+	protected const string ID = 'mapsco';
 
-	protected const NAME = 'Maps.co';
+	protected const string NAME = 'Maps.co';
 
-	protected const CACHE_GROUP = 'geocoding';
+	protected const string CACHE_GROUP = 'geocoding';
 
-	protected const CACHE_TTL = 604800;
+	protected const int CACHE_TTL = 604800;
 
 	/**
 	 * The API.
 	 */
-	private const API_BASE = 'https://geocode.maps.co/';
+	private const string API_BASE = 'https://geocode.maps.co/';
+
+	/**
+	 * The response formats Maps.co offers.
+	 */
+	public const array FORMATS = array( 'json', 'jsonv2', 'geojson', 'geocodejson' );
 
 	/**
 	 * The response format asked for.
@@ -69,7 +74,7 @@ class MapsCo extends Service implements Geocoder {
 
 	/**
 	 * The response format to ask for: `json`, `jsonv2`, `geojson`,
-	 * `geocodejson`.
+	 * `geocodejson`. Anything else is ignored.
 	 *
 	 * @since 1.0.0
 	 *
@@ -78,7 +83,9 @@ class MapsCo extends Service implements Geocoder {
 	 * @return static
 	 */
 	public function set_format( string $format ): static {
-		$this->format = $format;
+		if ( in_array( $format, self::FORMATS, true ) ) {
+			$this->format = $format;
+		}
 
 		return $this;
 	}
@@ -175,6 +182,7 @@ class MapsCo extends Service implements Geocoder {
 	 *
 	 * @return Location|WP_Error
 	 */
+	#[\Override]
 	public function locate( string $address ): Location|WP_Error {
 		return $this->location( $this->geocode( $address ) );
 	}
@@ -189,6 +197,7 @@ class MapsCo extends Service implements Geocoder {
 	 *
 	 * @return Location|WP_Error
 	 */
+	#[\Override]
 	public function locate_point( float $latitude, float $longitude ): Location|WP_Error {
 		return $this->location( $this->reverse_geocode( $latitude, $longitude ) );
 	}

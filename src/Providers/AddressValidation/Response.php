@@ -35,25 +35,25 @@ class Response extends Base {
 	 *
 	 * @var string
 	 */
-	public const CONFIDENCE_HIGH = 'HIGH';
-	public const CONFIDENCE_MEDIUM = 'MEDIUM';
-	public const CONFIDENCE_LOW = 'LOW';
-	public const CONFIDENCE_UNCERTAIN = 'UNCERTAIN';
+	public const string CONFIDENCE_HIGH = 'HIGH';
+	public const string CONFIDENCE_MEDIUM = 'MEDIUM';
+	public const string CONFIDENCE_LOW = 'LOW';
+	public const string CONFIDENCE_UNCERTAIN = 'UNCERTAIN';
 
 	/**
 	 * Address granularity level
 	 *
 	 * @var string
 	 */
-	public const GRANULARITY_PREMISE = 'PREMISE';
+	public const string GRANULARITY_PREMISE = 'PREMISE';
 
 	/**
 	 * USPS confirmation statuses
 	 *
 	 * @var string
 	 */
-	public const USPS_CONFIRMED = 'Y';
-	public const USPS_NOT_CONFIRMED = 'N';
+	public const string USPS_CONFIRMED = 'Y';
+	public const string USPS_NOT_CONFIRMED = 'N';
 
 	/**
 	 * Cache for computed values

@@ -127,6 +127,19 @@ final class MapsCoTest extends TestCase {
 	}
 
 	/**
+	 * Only the formats Maps.co offers are taken.
+	 *
+	 * @return void
+	 */
+	public function test_format_is_one_of_four(): void {
+		$client = new MapsCo( 'k', array( 'format' => 'geojson' ) );
+
+		$this->assertSame( 'geojson', $client->get_format() );
+		$this->assertSame( 'geojson', $client->set_format( 'xml&debug=1' )->get_format() );
+		$this->assertSame( 'json', ( new MapsCo( 'k', array( 'format' => 'html' ) ) )->get_format() );
+	}
+
+	/**
 	 * Clearing one answer asks again.
 	 *
 	 * @return void

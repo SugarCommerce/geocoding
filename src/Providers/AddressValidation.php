@@ -34,26 +34,26 @@ use WP_Error;
  */
 class AddressValidation extends Service implements Geocoder {
 
-	protected const ID = 'address_validation';
+	protected const string ID = 'address_validation';
 
-	protected const NAME = 'Google Address Validation';
+	protected const string NAME = 'Google Address Validation';
 
-	protected const CACHE_GROUP = 'geocoding';
+	protected const string CACHE_GROUP = 'geocoding';
 
 	/**
 	 * How long an answer is kept, by default: a day. An address does not move.
 	 */
-	protected const CACHE_TTL = 86400;
+	protected const int CACHE_TTL = 86400;
 
 	/**
 	 * The endpoint.
 	 */
-	private const API_ENDPOINT = 'https://addressvalidation.googleapis.com/v1:validateAddress';
+	private const string API_ENDPOINT = 'https://addressvalidation.googleapis.com/v1:validateAddress';
 
 	/**
 	 * The postal address fields the API takes.
 	 */
-	private const ADDRESS_FIELDS = array( 'revision', 'regionCode', 'languageCode', 'postalCode', 'sortingCode', 'administrativeArea', 'locality', 'sublocality', 'addressLines' );
+	private const array ADDRESS_FIELDS = array( 'revision', 'regionCode', 'languageCode', 'postalCode', 'sortingCode', 'administrativeArea', 'locality', 'sublocality', 'addressLines' );
 
 	/**
 	 * Options sent with every validation.
@@ -273,6 +273,7 @@ class AddressValidation extends Service implements Geocoder {
 	 *
 	 * @return Location|WP_Error
 	 */
+	#[\Override]
 	public function locate( string $address ): Location|WP_Error {
 		$response = $this->validate( $address );
 
@@ -318,6 +319,7 @@ class AddressValidation extends Service implements Geocoder {
 	 *
 	 * @return WP_Error
 	 */
+	#[\Override]
 	public function locate_point( float $latitude, float $longitude ): WP_Error {
 		return $this->error( 'unsupported', __( 'Address Validation turns addresses into places, not places into addresses.', 'sugarcommerce' ) );
 	}

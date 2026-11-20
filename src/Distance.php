@@ -29,7 +29,7 @@ final class Distance {
 	/**
 	 * The Earth's mean radius in each unit.
 	 */
-	public const RADIUS = array(
+	public const array RADIUS = array(
 		'km' => 6371.0088,
 		'mi' => 3958.7613,
 	);
@@ -37,7 +37,7 @@ final class Distance {
 	/**
 	 * Each unit, as how many of it make a kilometre.
 	 */
-	public const UNITS = array(
+	public const array UNITS = array(
 		'km' => 1.0,
 		'm'  => 1000.0,
 		'mi' => 0.621371,
