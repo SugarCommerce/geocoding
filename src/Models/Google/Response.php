@@ -10,10 +10,10 @@
 
 declare( strict_types=1 );
 
-namespace SugarCommerce\Geocoding\Providers\Google;
+namespace SugarCommerce\Geocoding\Models\Google;
 
 use SugarCommerce\Geocoding\Support\Field;
-use SugarCommerce\Network\Remote\Response as Base;
+use SugarCommerce\Network\Models\Remote\Response as Base;
 
 /**
  * Class Response

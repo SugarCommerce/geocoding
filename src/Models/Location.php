@@ -10,7 +10,10 @@
 
 declare( strict_types=1 );
 
-namespace SugarCommerce\Geocoding;
+namespace SugarCommerce\Geocoding\Models;
+
+use SugarCommerce\Geocoding\Distance;
+use SugarCommerce\Geocoding\Maps;
 
 /**
  * Class Location

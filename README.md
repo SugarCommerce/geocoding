@@ -179,6 +179,16 @@ Maps::google( $lat, $lng );   // and apple(), bing(), openstreetmap(), urls()
 
 Escape a link where it is printed.
 
+## Layout
+
+* `src/Geocoder.php` and `src/Providers/`: the services, Google, Maps.co and
+  Address Validation. `src/Distance.php` and `Maps.php`: how far, and map links.
+* `src/Models/`: data shapes and nothing that does work. `Location.php` is the
+  common answer; `Google/`, `MapsCo/` and `AddressValidation/` hold each
+  service's own answer (Address Validation's verdict and USPS reading are in
+  `src/Traits/AddressValidationResponse/`).
+* `src/Support/`: the query and field readers every provider shares.
+
 ## Security
 
 * An address is checked before it is sent: at most 1,000 characters, no control characters or broken UTF-8, line breaks made spaces

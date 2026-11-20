@@ -10,12 +10,12 @@
 
 declare( strict_types=1 );
 
-namespace SugarCommerce\Geocoding\Providers\AddressValidation;
+namespace SugarCommerce\Geocoding\Models\AddressValidation;
 
 use SugarCommerce\Geocoding\Support\Field;
 use SugarCommerce\Geocoding\Traits\AddressValidationResponse\Assessment;
 use SugarCommerce\Geocoding\Traits\AddressValidationResponse\Usps;
-use SugarCommerce\Network\Remote\Response as Base;
+use SugarCommerce\Network\Models\Remote\Response as Base;
 
 /**
  * Class Response

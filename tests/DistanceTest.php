@@ -12,8 +12,8 @@ namespace SugarCommerce\Geocoding\Tests;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use SugarCommerce\Geocoding\Distance;
-use SugarCommerce\Geocoding\Location;
 use SugarCommerce\Geocoding\Maps;
+use SugarCommerce\Geocoding\Models\Location;
 
 /**
  * The pieces that need no service.

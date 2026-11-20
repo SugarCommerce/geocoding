@@ -12,6 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\Geocoding;
 
+use SugarCommerce\Geocoding\Models\Location;
 use WP_Error;
 
 /**

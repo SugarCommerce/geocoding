@@ -10,8 +10,8 @@ declare( strict_types=1 );
 namespace SugarCommerce\Geocoding\Tests\Providers;
 
 use PHPUnit\Framework\TestCase;
+use SugarCommerce\Geocoding\Models\Google\Response;
 use SugarCommerce\Geocoding\Providers\Google;
-use SugarCommerce\Geocoding\Providers\Google\Response;
 use SugarCommerce\Geocoding\Tests\Support\FakeHttp;
 
 /**

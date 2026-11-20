@@ -10,12 +10,12 @@
 
 declare( strict_types=1 );
 
-namespace SugarCommerce\Geocoding\Providers\MapsCo;
+namespace SugarCommerce\Geocoding\Models\MapsCo;
 
 use SugarCommerce\Geocoding\Distance;
 use SugarCommerce\Geocoding\Maps;
 use SugarCommerce\Geocoding\Support\Field;
-use SugarCommerce\Network\Remote\Response as Base;
+use SugarCommerce\Network\Models\Remote\Response as Base;
 
 /**
  * Class Response

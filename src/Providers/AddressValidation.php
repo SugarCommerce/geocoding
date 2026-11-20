@@ -12,8 +12,8 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\Geocoding\Providers;
 
-use SugarCommerce\Geocoding\Location;
-use SugarCommerce\Geocoding\Providers\AddressValidation\Response;
+use SugarCommerce\Geocoding\Models\Location;
+use SugarCommerce\Geocoding\Models\AddressValidation\Response;
 use SugarCommerce\Geocoding\Geocoder;
 use SugarCommerce\Geocoding\Support\Field;
 use SugarCommerce\Geocoding\Support\Query;

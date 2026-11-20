@@ -11,7 +11,7 @@ declare( strict_types=1 );
 namespace SugarCommerce\Geocoding\Tests;
 
 use PHPUnit\Framework\TestCase;
-use SugarCommerce\Geocoding\Location;
+use SugarCommerce\Geocoding\Models\Location;
 use SugarCommerce\Geocoding\Providers\AddressValidation;
 use SugarCommerce\Geocoding\Providers\Google;
 use SugarCommerce\Geocoding\Providers\MapsCo;
