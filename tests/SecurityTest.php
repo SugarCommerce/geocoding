@@ -11,9 +11,11 @@ declare( strict_types=1 );
 namespace SugarCommerce\Geocoding\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SugarCommerce\Geocoding\Providers\AddressValidation;
 use SugarCommerce\Geocoding\Providers\Google;
 use SugarCommerce\Geocoding\Providers\MapsCo;
 use SugarCommerce\Geocoding\Tests\Support\FakeHttp;
+use WP_Error;
 
 /**
  * Input is validated, answers are untrusted data.
@@ -73,4 +75,33 @@ final class SecurityTest extends TestCase {
 		$this->assertSame( 'json', $sent['query']['format'] ?? null );
 		$this->assertNull( $sent['fragment'] );
 	}
+
+	/**
+	 * An address that cannot be one -- too long, control characters,
+	 * broken UTF-8 -- is refused before a request is spent on it, by every
+	 * geocoder. A line break is a space.
+	 *
+	 * @return void
+	 */
+	public function test_address_is_checked_before_it_is_sent(): void {
+		$geocoders = array( new Google( 'k' ), new MapsCo( 'k' ), new AddressValidation( 'k' ) );
+		$refused   = array( str_repeat( 'a', 1001 ), "1 Main\x00 St", "1 Main St\x1b[31m", "1 Main St \xC3\x28" );
+
+		foreach ( $geocoders as $geocoder ) {
+			foreach ( $refused as $address ) {
+				$error = $geocoder->locate( $address );
+
+				$this->assertInstanceOf( WP_Error::class, $error );
+				$this->assertSame( $geocoder->get_id() . '_invalid_address', $error->get_error_code() );
+			}
+		}
+
+		$this->assertSame( 0, FakeHttp::count() );
+
+		FakeHttp::json( array( 'status' => 'ZERO_RESULTS', 'results' => array() ) );
+		( new Google( 'k' ) )->geocode( "1 Main St\r\nLondon" );
+
+		$this->assertSame( '1 Main St London', self::sent()['query']['address'] ?? null );
+	}
 }
+

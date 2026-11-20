@@ -61,10 +61,10 @@ class Google extends Service implements Geocoder {
 	 * @return Response|WP_Error
 	 */
 	public function geocode( string $address, array $params = array() ): Response|WP_Error {
-		$address = trim( $address );
+		$address = Query::address( $address );
 
-		if ( '' === $address ) {
-			return $this->error( 'invalid_address', __( 'The address is empty.', 'sugarcommerce' ) );
+		if ( null === $address ) {
+			return $this->error( 'invalid_address', __( 'That is not an address: empty, too long, or with characters no address has.', 'sugarcommerce' ) );
 		}
 
 		return $this->ask( 'geocode_' . $address, array( 'address' => $address ) + $params );

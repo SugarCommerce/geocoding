@@ -112,10 +112,10 @@ class MapsCo extends Service implements Geocoder {
 	 * @return Response|WP_Error `mapsco_no_results` when nothing matched.
 	 */
 	public function geocode( string $address ): Response|WP_Error {
-		$address = trim( $address );
+		$address = Query::address( $address );
 
-		if ( '' === $address ) {
-			return $this->error( 'invalid_address', __( 'The address is empty.', 'sugarcommerce' ) );
+		if ( null === $address ) {
+			return $this->error( 'invalid_address', __( 'That is not an address: empty, too long, or with characters no address has.', 'sugarcommerce' ) );
 		}
 
 		$data = $this->remember(

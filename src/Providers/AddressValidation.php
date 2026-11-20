@@ -15,6 +15,7 @@ namespace SugarCommerce\Geocoding\Providers;
 use SugarCommerce\Geocoding\Location;
 use SugarCommerce\Geocoding\Providers\AddressValidation\Response;
 use SugarCommerce\Geocoding\Geocoder;
+use SugarCommerce\Geocoding\Support\Query;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
 
@@ -218,7 +219,7 @@ class AddressValidation extends Service implements Geocoder {
 		$body    = array( 'address' => self::postal_address( $address ) );
 
 		if ( array() === $body['address'] ) {
-			return $this->error( 'invalid_address', __( 'The address is empty.', 'sugarcommerce' ) );
+			return $this->error( 'invalid_address', __( 'That is not an address: empty, too long, or with characters no address has.', 'sugarcommerce' ) );
 		}
 
 		if ( ! empty( $options['previous_response'] ) ) {
@@ -333,7 +334,9 @@ class AddressValidation extends Service implements Geocoder {
 	 */
 	private static function postal_address( string|array $address ): array {
 		if ( is_string( $address ) ) {
-			return '' === trim( $address ) ? array() : array( 'addressLines' => array( trim( $address ) ) );
+			$address = Query::address( $address );
+
+			return null === $address ? array() : array( 'addressLines' => array( $address ) );
 		}
 
 		$postal = array();
