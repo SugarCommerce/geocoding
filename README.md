@@ -86,6 +86,10 @@ not in the options table: it starts a new generation of cache keys (an
 option named `geocoding_{id}_generation`), so nothing kept before is found again. Errors are `WP_Error`s whose codes start with the geocoder's
 id: `google_api_error`, `mapsco_no_results`, `address_validation_unsupported`.
 
+Each geocoder's answer class sits beside it in `Providers/<Name>/`; where
+a class has more than one job, each job is a trait in `Traits/<Class>/`, and
+the readers every geocoder shares are in `Support/`.
+
 The cache, the failure memory and reading an answer are sugarcommerce/network's
 `SugarCommerce\Network\Remote\Service` -- the family's one cached-API base,
 shared with ip-lookup -- and each answer extends its `Remote\Response`. A
@@ -175,40 +179,16 @@ Maps::google( $lat, $lng );   // and apple(), bing(), openstreetmap(), urls()
 
 Escape a link where it is printed.
 
-## Moving from arraypress/wp-*
+## Security
 
-This library is `wp-google-geocoding`, `wp-mapsco-geocoding` and
-`wp-google-address-validation` in one.
-
-| Was | Now |
-|---|---|
-| `ArrayPress\Google\Geocoding\Client` | `SugarCommerce\Geocoding\Providers\Google` |
-| `ArrayPress\Google\Geocoding\Response` | `Providers\Google\Response` |
-| `ArrayPress\Google\Geocoding\Distance` | `SugarCommerce\Geocoding\Distance` |
-| `ArrayPress\MapsCo\Geocoding\Client` | `Providers\MapsCo` |
-| `ArrayPress\MapsCo\Geocoding\Response` | `Providers\MapsCo\Response` |
-| `ArrayPress\Google\AddressValidation\Client` | `Providers\AddressValidation` |
-| `ArrayPress\Google\AddressValidation\Response` | `Providers\AddressValidation\Response` |
-| `new Client( $key, $enable_cache, $expiration )` | `new Google( $key, [ 'cache' => $enable_cache, 'cache_ttl' => $expiration ] )`, the same for the others |
-| `set_cache_expiration()`, `get_cache_expiration()` | `set_cache_ttl()`, `get_cache_ttl()` |
-| `get_cache_settings()` | `is_cache_enabled()`, `get_cache_ttl()`, `get_failure_ttl()` |
-| `Response::get_all()` (Google), `get_raw_data()` (Maps.co) | `to_array()`; one field is `get( 'field' )` |
-| Maps.co `Response::get_*_maps_url()`, `get_map_urls()` | unchanged, built by `Maps` |
-| Maps.co `Response::get_available_distance_units()` | unchanged, or `Distance::units()` |
-| `clear_cache( 'forward_' . $address )` (Maps.co) | `clear_cache( 'forward_' . $address . '|json' )` -- the format is part of the question |
-| `SugarCommerce\Geocoding\{Service, Response}` | `SugarCommerce\Network\Remote\{Service, Response}` (sugarcommerce/network) -- one copy, shared with ip-lookup; keys and behaviour unchanged |
-
-Answers that changed:
-
-* Error codes start with the geocoder's id. They were `api_error`, `json_error`, `invalid_address`, `no_results` with no prefix.
-* Google's refusal carries its `error_message`, not only the status. Google refuses an empty address and impossible coordinates before asking, as Maps.co did.
-* Google's `geocode()` and `reverse_geocode()` take the API's other parameters -- `region`, `language`, `components` -- as a second or third argument.
-* Maps.co keeps "nothing found" for the cache lifetime instead of asking again every time.
-* Address Validation refuses an empty address before asking.
-* Text domain `arraypress` is `sugarcommerce`.
-
-New: `Geocoder`, `Location`, `locate()` and `locate_point()`, `Maps`, and
-`Distance::from_km()` and `units()`.
+* An address is checked before it is sent: at most 1,000 characters, no control characters or broken UTF-8, line breaks made spaces
+* Every value in a query is encoded, so an address cannot add parameters, replace the key, or cut the request short with a `#`
+* Every field of an answer is read as its type: a malformed or hostile answer is no answer, never a fatal error on the page that asked
+* A service's own error text becomes a plain-text, one-line, clipped message, so no markup reaches a notice that prints it
+* Keys stay out of URLs where the service allows: Address Validation gets its key in the `X-Goog-Api-Key` header; Google Geocoding and Maps.co take theirs only as a query parameter, over HTTPS
+* A key is never part of an error message or error data, and is a `#[\SensitiveParameter]` everywhere it is passed, so stack traces leave it out
+* Every endpoint is a fixed HTTPS address, and every request has a timeout
+* Answers are cached per geocoder, per key and per question, so two accounts or two questions never share one
 
 ## Requirements
 
