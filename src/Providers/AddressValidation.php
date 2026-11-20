@@ -245,9 +245,14 @@ class AddressValidation extends Service implements Geocoder {
 				$data = $this->json(
 					$this->request(
 						'POST',
-						add_query_arg( array( 'key' => $this->api_key ), self::API_ENDPOINT ),
+						self::API_ENDPOINT,
 						array(
-							'headers' => array( 'Content-Type' => 'application/json' ),
+							// The key in Google's header for it, never the URL: a URL
+							// is what HTTP logs, debugging plugins and proxies keep.
+							'headers' => array(
+								'Content-Type'   => 'application/json',
+								'X-Goog-Api-Key' => $this->api_key,
+							),
 							'body'    => $json,
 						)
 					)

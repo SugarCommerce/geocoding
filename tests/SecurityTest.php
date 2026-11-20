@@ -229,5 +229,20 @@ final class SecurityTest extends TestCase {
 		$this->assertIsArray( $response->get_standardized_address() );
 		$this->assertIsBool( $response->is_shippable() );
 	}
+
+	/**
+	 * Address Validation's key goes in a header, not the URL: a URL is
+	 * what HTTP logs, debugging plugins and proxies keep.
+	 *
+	 * @return void
+	 */
+	public function test_address_validation_key_is_not_in_the_url(): void {
+		FakeHttp::json( array( 'result' => array() ) );
+
+		( new AddressValidation( 'top-secret-key' ) )->validate( '10 Downing Street' );
+
+		$this->assertStringNotContainsString( 'top-secret-key', FakeHttp::last()['url'] );
+		$this->assertSame( 'top-secret-key', FakeHttp::last()['args']['headers']['X-Goog-Api-Key'] ?? null );
+	}
 }
 

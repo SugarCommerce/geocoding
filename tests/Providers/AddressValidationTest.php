@@ -87,7 +87,8 @@ final class AddressValidationTest extends TestCase {
 
 		$request = FakeHttp::last();
 		$this->assertSame( 'POST', $request['method'] );
-		$this->assertSame( 'https://addressvalidation.googleapis.com/v1:validateAddress?key=key', $request['url'] );
+		$this->assertSame( 'https://addressvalidation.googleapis.com/v1:validateAddress', $request['url'] );
+		$this->assertSame( 'key', $request['args']['headers']['X-Goog-Api-Key'] );
 		$this->assertSame(
 			array(
 				'address'         => array(
