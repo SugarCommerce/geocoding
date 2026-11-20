@@ -143,6 +143,15 @@ function esc_html( $text ) {
 }
 
 /**
+ * @param string $text Text.
+ *
+ * @return string
+ */
+function wp_strip_all_tags( $text ) {
+	return trim( strip_tags( (string) $text ) );
+}
+
+/**
  * @param mixed $value Value.
  *
  * @return string|false

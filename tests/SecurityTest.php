@@ -244,5 +244,39 @@ final class SecurityTest extends TestCase {
 		$this->assertStringNotContainsString( 'top-secret-key', FakeHttp::last()['url'] );
 		$this->assertSame( 'top-secret-key', FakeHttp::last()['args']['headers']['X-Goog-Api-Key'] ?? null );
 	}
+
+	/**
+	 * A service's refusal becomes an error message as plain text, one line
+	 * and clipped: markup in it cannot reach a notice that prints it, and a
+	 * message that is not text is no message.
+	 *
+	 * @return void
+	 */
+	public function test_provider_error_text_is_plain(): void {
+		FakeHttp::json(
+			array(
+				'status'        => 'REQUEST_DENIED',
+				'error_message' => "<img src=x onerror=alert(1)>The provided\n key " . str_repeat( 'x', 500 ),
+			)
+		);
+
+		$message = ( new Google( 'k' ) )->geocode( '10 Downing Street' )->get_error_message();
+
+		$this->assertStringStartsWith( 'REQUEST_DENIED: The provided key x', $message );
+		$this->assertStringNotContainsString( '<', $message );
+		$this->assertLessThanOrEqual( 320, mb_strlen( $message ) );
+
+		FakeHttp::json( array( 'status' => array( 'nested' ) ) );
+
+		$this->assertSame( 'Google Geocoding could not answer.', ( new Google( 'k' ) )->geocode( '1 Main St' )->get_error_message() );
+
+		FakeHttp::json( array( 'error' => '<b>Invalid</b> API key' ) );
+
+		$this->assertSame( 'Invalid API key', ( new MapsCo( 'k' ) )->geocode( '1 Main St' )->get_error_message() );
+
+		FakeHttp::json( array( 'error' => array( 'message' => array( 'nested' ) ) ) );
+
+		$this->assertSame( 'Address Validation could not answer.', ( new AddressValidation( 'k' ) )->validate( '1 Main St' )->get_error_message() );
+	}
 }
 

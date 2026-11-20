@@ -15,6 +15,7 @@ namespace SugarCommerce\Geocoding\Providers;
 use SugarCommerce\Geocoding\Location;
 use SugarCommerce\Geocoding\Providers\AddressValidation\Response;
 use SugarCommerce\Geocoding\Geocoder;
+use SugarCommerce\Geocoding\Support\Field;
 use SugarCommerce\Geocoding\Support\Query;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
@@ -259,7 +260,7 @@ class AddressValidation extends Service implements Geocoder {
 				);
 
 				if ( ! is_wp_error( $data ) && isset( $data['error'] ) ) {
-					return $this->error( 'api_error', (string) ( $data['error']['message'] ?? __( 'Address Validation could not answer.', 'sugarcommerce' ) ) );
+					return $this->error( 'api_error', Field::message( Field::map( $data['error'] )['message'] ?? null, __( 'Address Validation could not answer.', 'sugarcommerce' ) ) );
 				}
 
 				return $data;

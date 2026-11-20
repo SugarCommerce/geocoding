@@ -15,6 +15,7 @@ namespace SugarCommerce\Geocoding\Providers;
 use SugarCommerce\Geocoding\Location;
 use SugarCommerce\Geocoding\Providers\MapsCo\Response;
 use SugarCommerce\Geocoding\Geocoder;
+use SugarCommerce\Geocoding\Support\Field;
 use SugarCommerce\Geocoding\Support\Query;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
@@ -252,7 +253,7 @@ class MapsCo extends Service implements Geocoder {
 		$data = $this->json( $this->request( 'GET', Query::url( self::API_BASE . $endpoint, $params ) ) );
 
 		if ( ! is_wp_error( $data ) && isset( $data['error'] ) ) {
-			return $this->error( 'api_error', is_string( $data['error'] ) ? $data['error'] : __( 'Maps.co could not answer.', 'sugarcommerce' ) );
+			return $this->error( 'api_error', Field::message( $data['error'], __( 'Maps.co could not answer.', 'sugarcommerce' ) ) );
 		}
 
 		return $data;

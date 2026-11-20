@@ -15,6 +15,7 @@ namespace SugarCommerce\Geocoding\Providers;
 use SugarCommerce\Geocoding\Location;
 use SugarCommerce\Geocoding\Providers\Google\Response;
 use SugarCommerce\Geocoding\Geocoder;
+use SugarCommerce\Geocoding\Support\Field;
 use SugarCommerce\Geocoding\Support\Query;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
@@ -175,12 +176,19 @@ class Google extends Service implements Geocoder {
 					return $data;
 				}
 
-				$status = (string) ( $data['status'] ?? '' );
+				$status = Field::text( $data['status'] ?? null ) ?? '';
 
 				if ( 'OK' !== $status && 'ZERO_RESULTS' !== $status ) {
+					$status  = 1 === preg_match( '/^[A-Z_]{1,40}$/', $status ) ? $status : '';
+					$message = Field::message( $data['error_message'] ?? null, '' );
+
 					return $this->error(
 						'api_error',
-						'' === (string) ( $data['error_message'] ?? '' ) ? $status : $status . ': ' . $data['error_message'],
+						match ( true ) {
+							'' === $status  => __( 'Google Geocoding could not answer.', 'sugarcommerce' ),
+							'' === $message => $status,
+							default         => $status . ': ' . $message,
+						},
 						array( 'status' => $status )
 					);
 				}
