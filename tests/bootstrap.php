@@ -152,13 +152,24 @@ function wp_json_encode( $value ) {
 }
 
 /**
+ * As WordPress's: the values go in as they are, NOT encoded -- the reason
+ * nothing that came from a visitor may be handed to it.
+ *
  * @param array  $args Query arguments.
  * @param string $url  URL.
  *
  * @return string
  */
 function add_query_arg( array $args, string $url ) {
-	return $url . ( str_contains( $url, '?' ) ? '&' : '?' ) . http_build_query( $args );
+	$pairs = array();
+
+	foreach ( $args as $key => $value ) {
+		if ( false !== $value ) {
+			$pairs[] = '' === (string) $value ? $key : $key . '=' . $value;
+		}
+	}
+
+	return $url . ( str_contains( $url, '?' ) ? '&' : '?' ) . implode( '&', $pairs );
 }
 
 /**

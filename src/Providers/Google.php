@@ -15,6 +15,7 @@ namespace SugarCommerce\Geocoding\Providers;
 use SugarCommerce\Geocoding\Location;
 use SugarCommerce\Geocoding\Providers\Google\Response;
 use SugarCommerce\Geocoding\Geocoder;
+use SugarCommerce\Geocoding\Support\Query;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
 
@@ -168,7 +169,7 @@ class Google extends Service implements Geocoder {
 		$data  = $this->remember(
 			$identifier . ( array() === $extra ? '' : '|' . md5( serialize( $extra ) ) ),
 			function () use ( $params ) {
-				$data = $this->json( $this->request( 'GET', add_query_arg( $params + array( 'key' => $this->api_key ), self::API_ENDPOINT ) ) );
+				$data = $this->json( $this->request( 'GET', Query::url( self::API_ENDPOINT, array_merge( $params, array( 'key' => $this->api_key ) ) ) ) );
 
 				if ( is_wp_error( $data ) ) {
 					return $data;
